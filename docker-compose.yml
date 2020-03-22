@@ -1,0 +1,45 @@
+version: "3.7"
+
+services: 
+
+  influxdb:
+    image: influxdb:1.7
+    container_name: influxdb
+    ports:
+      - "8086:8086" # This is the HTTP port
+    env_file:
+      - 'env.influxdb'
+    networks:
+      - influxdb
+    # volumes:
+      # - ~projects/docker/influxdb/data:/var/lib/influxdb
+
+  telegraf:
+    image: telegraf:1.13
+    container_name: telegraf
+    networks:
+      - influxdb
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+
+  chronograf:
+    image: chronograf:1.8
+    container_name: chronograf
+    ports:
+      - "8888:8888"
+    networks:
+      - influxdb
+
+  grafana:
+    image: grafana/grafana:6.7.1
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - influxdb
+    # volumes:
+      # - ~/projects/docker/grafana/data:/var/lib/grafana
+
+networks:
+  # Make a network connecting all containers seamlessly
+  influxdb:
